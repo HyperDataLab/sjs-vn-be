@@ -32,6 +32,7 @@ import catalogRoutes from './modules/system/routes/catalog.route.js';
 import searchRoutes from './modules/system/routes/search.route.js';
 import zoneRoutes from './modules/system/routes/zone.route.js';
 import trendingVnRoutes from './modules/system/routes/trendingVn.route.js';
+import storageRoutes from './modules/storage/routes/storage.route.js';
 
 const buildApp = async () => {
   const app = Fastify({ logger: true });
@@ -143,6 +144,7 @@ const buildApp = async () => {
       else if (url.includes('search')) tag = 'H? th?ng - T�m ki?m (Search)';
       else if (url.includes('zones')) tag = 'H? th?ng - V�ng (Zone)';
       else if (url.includes('trending-vn')) tag = 'H? th?ng - Xu hu?ng VN';
+      else if (url.includes('storage')) tag = 'Luu tru (Storage)';
 
       routeOptions.schema.tags = [tag];
     }
@@ -176,6 +178,7 @@ const buildApp = async () => {
   app.register(searchRoutes, { prefix: '/api/v1/search' });
   app.register(zoneRoutes, { prefix: '/api/v1/zones' });
   app.register(trendingVnRoutes, { prefix: '/api/v1/trending-vn' });
+  app.register(storageRoutes, { prefix: '/api/v1/storage' });
 
   return app;
 };

@@ -1,0 +1,17 @@
+name = "researchpulse-media-cdn"
+main = "src/index.js"
+compatibility_date = "2024-04-01"
+
+[vars]
+# Tên bucket Firebase Storage chứa tệp tin (PDFs, Avatars, Reports)
+FIREBASE_STORAGE_BUCKET = "scientificjournalsystem.appspot.com"
+
+# Thời gian lưu cache tại máy chủ biên Cloudflare (tính bằng giây)
+# Mặc định: 2592000 giây = 30 ngày (vì bài báo khoa học là tài liệu bất biến sau xuất bản)
+CACHE_TTL_SECONDS = "2592000"
+
+# Cấu hình CORS cho phép frontend tải dữ liệu/xem file
+ALLOWED_ORIGINS = "*"
+
+# Danh sách các thư mục được phép truy cập qua CDN (ngăn chặn truy cập tệp ngoài ý muốn)
+ALLOWED_FOLDERS = "articles,avatars,reports"

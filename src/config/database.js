@@ -1,4 +1,4 @@
-﻿import pkg from "pg";
+import pkg from "pg";
 import dotenv from "dotenv";
 import logger from "../utils/logger.js";
 
@@ -6,7 +6,7 @@ dotenv.config();
 
 const { Pool } = pkg;
 
-const url = process.env.POSTGRES_URL || "";
+const url = process.env.POSTGRES_URL || process.env.DATABASE_URL || "";
 const isLocalOrPrivate =
   url.includes("localhost") ||
   url.includes("127.0.0.1") ||
