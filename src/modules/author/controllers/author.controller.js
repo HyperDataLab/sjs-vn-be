@@ -34,7 +34,7 @@ export const getAuthorAreasBreakdown = async (request, reply) => {
 export const getAuthorArticles = async (request, reply) => {
   try {
     const authorId = Number(request.params.id);
-    const limit = request.query.limit !== undefined ? Number(request.query.limit) : 10;
+    const limit = request.query.limit !== undefined ? Math.min(Math.max(Number(request.query.limit) || 10, 1), 100) : 10;
     const page = request.query.page !== undefined ? Number(request.query.page) : 1;
     const safeLimit = limit === 0 ? 10 : limit;
 
@@ -53,7 +53,7 @@ export const getAuthorArticles = async (request, reply) => {
 
 export const getAuthorLeaderboard = async (request, reply) => {
   try {
-    const limit = Number(request.query.limit) || 10;
+    const limit = Math.min(Math.max(Number(request.query.limit) || 10, 1), 100);
     const page = Number(request.query.page) || 1;
 
     if (!Number.isInteger(limit) || limit < 0) return reply.status(400).send({ success: false, code: AUTHOR_CODES.AUTHOR_INVALID_LIMIT, message: "Giá trị limit không hợp lệ" });

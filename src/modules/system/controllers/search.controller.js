@@ -4,7 +4,7 @@ import logger from '../../../utils/logger.js';
 export const search = async (request, reply) => {
     const { keyword } = request.params;
     try{
-        const result = await searchService.search(keyword, Number(request.query.limit) || 20);
+        const result = await searchService.search(keyword, Math.min(Math.max(Number(request.query.limit) || 20, 1), 100));
         return reply.status(200).send({ success: true, code: 'SEARCH_SUCCESS', data: result });
     }catch(error){
         logger.error(error);
