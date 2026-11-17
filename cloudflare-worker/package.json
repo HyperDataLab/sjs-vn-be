@@ -1,0 +1,23 @@
+{
+  "name": "researchpulse-media-cdn-worker",
+  "version": "1.0.0",
+  "description": "Cloudflare Worker Edge Cache & Media CDN Proxy for ResearchPulse Firebase Storage",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "test": "node --test tests/worker.test.js"
+  },
+  "keywords": [
+    "cloudflare-worker",
+    "firebase-storage",
+    "cdn",
+    "cache-shield",
+    "researchpulse"
+  ],
+  "license": "ISC",
+  "devDependencies": {
+    "wrangler": "^3.50.0"
+  }
+}
