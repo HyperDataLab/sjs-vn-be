@@ -435,6 +435,7 @@ src/tests/
 !/src/tests/unit/services/orcidScanRepository.test.js
 !/src/tests/unit/services/articleReferenceHydration.test.js
 !/src/tests/unit/services/storage.test.js
+!/src/tests/unit/services/databasePool.test.js
 !/src/tests/unit/auth/
 !/src/tests/unit/auth/*
 !/src/tests/integration/
