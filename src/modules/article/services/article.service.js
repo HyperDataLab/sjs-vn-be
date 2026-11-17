@@ -20,7 +20,10 @@ export const getArticlesByKeywords = async (keywords, limit = 20, offset = 0, pa
         .map((_, index) => `$${filter.values.length + index + 1}`)
         .join(', ');
 
-    const values = [...filter.values, ...keywords, limit, offset];
+    const safeLimit = Math.min(Math.max(Number(limit) || 20, 1), 100);
+    const safeOffset = Math.max(Number(offset) || 0, 0);
+
+    const values = [...filter.values, ...keywords, safeLimit, safeOffset];
     const limitIndex = values.length - 1;
     const offsetIndex = values.length;
 
@@ -195,9 +198,14 @@ export const getAllArticles = async (firstParam = {}, offsetParam = 0, sortByPar
         const filter = buildArticleFilter(params);
         const values = [...filter.values];
 
-        values.push(Number(limit));
+        const rawLimit = Number(limit);
+        const safeLimit = Math.min(Math.max(Number.isFinite(rawLimit) && rawLimit > 0 ? rawLimit : 10, 1), 100);
+        const rawOffset = toOptionalNumber(offset);
+        const safeOffset = Math.max(Number.isFinite(rawOffset) ? rawOffset : 0, 0);
+
+        values.push(safeLimit);
         const limitIndex = values.length;
-        values.push(toOptionalNumber(offset) ?? 0);
+        values.push(safeOffset);
         const offsetIndex = values.length;
 
         const query = `

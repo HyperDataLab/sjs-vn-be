@@ -54,13 +54,23 @@ const cached = (name, params, fetchFn) => {
   );
 };
 
+/**
+ * Lấy thống kê bài báo đã được cache theo bộ lọc (loại trừ limit/offset để tái sử dụng qua nhiều trang)
+ */
+export const getCachedArticleStats = (params = {}) => {
+  const { limit, offset, sortBy, sortOrder, ...filterParams } = params;
+  return cached("stats", filterParams, () =>
+    articleService.getArticleListStats(filterParams).catch((error) => {
+      logger.error("Lỗi khi lấy stats cho article discovery cache:", error);
+      return { totalArticles: 0, openAccessCount: 0, authorsCount: 0, topicsCount: 0 };
+    })
+  );
+};
+
 export const getArticleListData = (params = {}) => cached("list", params, async () => {
   const [articles, stats] = await Promise.all([
     articleService.getAllArticles(params),
-    articleService.getArticleListStats(params).catch((error) => {
-      logger.error("Lỗi khi lấy stats cho article discovery cache:", error);
-      return { totalArticles: 0, openAccessCount: 0, authorsCount: 0, topicsCount: 0 };
-    }),
+    getCachedArticleStats(params),
   ]);
 
   const total = Number(stats?.totalArticles) || articles.length || 0;
