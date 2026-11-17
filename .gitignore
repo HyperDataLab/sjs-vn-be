@@ -111,6 +111,7 @@ _ops/
 
 # Local agent/workflow material (kept on developer machines only)
 /scripts/
+!/scripts/verify-storage-flow.mjs
 /tasks/
 /docs/
 /deploy/
@@ -306,6 +307,7 @@ _ops/
 
 # Local agent/workflow material (kept on developer machines only)
 /scripts/
+!/scripts/verify-storage-flow.mjs
 /tasks/
 /docs/
 /deploy/
@@ -432,6 +434,7 @@ src/tests/
 !/src/tests/unit/services/orcidScan.test.js
 !/src/tests/unit/services/orcidScanRepository.test.js
 !/src/tests/unit/services/articleReferenceHydration.test.js
+!/src/tests/unit/services/storage.test.js
 !/src/tests/unit/auth/
 !/src/tests/unit/auth/*
 !/src/tests/integration/
