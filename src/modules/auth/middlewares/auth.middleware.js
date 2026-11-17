@@ -3,6 +3,7 @@ import { createLog } from '../../system/services/log.service.js';
 import { verifyChildAccessToken } from '../config/authTokens.js';
 import { getAuthCookieNames } from '../utils/authCookies.js';
 import { verifyBlocker } from '../services/sso.service.js';
+import { verifyFirebaseToken } from '../services/firebaseAuth.service.js';
 
 const reject = (reply, statusCode, code, message) => reply.status(statusCode).send({
   success: false,
@@ -52,7 +53,53 @@ export const resolveAuthenticatedUser = async (request) => {
     throw error;
   }
 
-  const decoded = verifyChildAccessToken(token);
+  let decoded;
+  try {
+    decoded = verifyChildAccessToken(token);
+  } catch (childError) {
+    try {
+      const firebaseDecoded = await verifyFirebaseToken(token);
+      if (!firebaseDecoded?.email) {
+        const error = new Error('Firebase account has no associated email address');
+        error.statusCode = 400;
+        error.code = 'FIREBASE_EMAIL_MISSING';
+        throw error;
+      }
+      if (firebaseDecoded.email_verified === false) {
+        const error = new Error('Email Firebase chưa được xác thực');
+        error.statusCode = 403;
+        error.code = 'EMAIL_NOT_VERIFIED';
+        throw error;
+      }
+      const user = await prisma.user.findFirst({
+        where: { email: { equals: firebaseDecoded.email.trim().toLowerCase(), mode: 'insensitive' } },
+        select: { user_id: true, email: true, role: true, status: true, type: true },
+      });
+      if (!user || user.status !== 'ACTIVE') {
+        const error = new Error('Local account is unavailable');
+        error.statusCode = 403;
+        error.code = 'ACCOUNT_UNAVAILABLE';
+        throw error;
+      }
+      return {
+        user_id: user.user_id,
+        email: user.email,
+        role: user.role,
+        status: user.status,
+        type: user.type,
+        firebase_uid: firebaseDecoded.uid,
+      };
+    } catch (firebaseErr) {
+      if (
+        firebaseErr.code === 'ACCOUNT_UNAVAILABLE' ||
+        firebaseErr.code === 'FIREBASE_EMAIL_MISSING' ||
+        firebaseErr.code === 'EMAIL_NOT_VERIFIED'
+      ) {
+        throw firebaseErr;
+      }
+      throw childError;
+    }
+  }
   if (decoded.parent_fingerprint) {
     const blocker = verifyBlocker(request.cookies?.[getAuthCookieNames().blocker]);
     if (blocker?.fingerprint === decoded.parent_fingerprint) {

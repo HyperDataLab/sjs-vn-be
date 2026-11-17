@@ -11,6 +11,10 @@
     "test:controller": "node --test src/tests/unit/controllers/*.test.js",
     "test:service": "node --test src/tests/unit/service/*.test.js",
     "test:auth": "node --test --experimental-test-module-mocks src/tests/unit/auth/*.test.js src/tests/integration/auth*.test.js src/tests/integration/auth/*.test.js",
+    "emulator": "firebase emulators:start --only auth,storage",
+    "emulator:auth": "firebase emulators:start --only auth",
+    "test:emulator": "node scripts/run-emulator-tests.mjs",
+    "verify:emulator": "node scripts/verify-emulator-integration.mjs",
     "check:brain-manifest": "repo-harness run check-brain-manifest",
     "check:context-files": "repo-harness run check-context-files",
     "check:deploy-sql": "repo-harness run check-deploy-sql-order",
@@ -45,6 +49,7 @@
   },
   "devDependencies": {
     "eslint": "^8.57.0",
+    "firebase-tools": "^15.36.0",
     "nodemon": "3.1.14",
     "prisma": "^5.10.0",
     "supertest": "7.2.2"
