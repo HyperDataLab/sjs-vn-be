@@ -21,13 +21,16 @@ export const requestUploadUrl = async (request, reply) => {
     if (userId) {
       await createLog({
         userId,
-
         userRole: request.user?.role || 'USER',
-        action: 'STORAGE',
-        endpoint: '/api/v1/storage/upload-url',
-        method: 'POST',
-        detail: `Yêu cầu upload URL cho ${folder}/${fileName} (${contentType})`,
-        ip: request.ip,
+        action: 'CREATE',
+        message: `Yêu cầu upload URL cho ${folder}/${fileName} (${contentType})`,
+        metadata: {
+          endpoint: '/api/v1/storage/upload-url',
+          method: 'POST',
+          folder,
+          fileName,
+          ip: request.ip,
+        },
       }).catch((logErr) => logger.warn(`Log storage upload failed: ${logErr.message}`));
     }
 
@@ -61,11 +64,14 @@ export const deleteStorageFile = async (request, reply) => {
       await createLog({
         userId,
         userRole: request.user?.role || 'USER',
-        action: 'STORAGE',
-        endpoint: '/api/v1/storage/file',
-        method: 'DELETE',
-        detail: `Xóa tệp lưu trữ: ${filePath}`,
-        ip: request.ip,
+        action: 'DELETE',
+        message: `Xóa tệp lưu trữ: ${filePath}`,
+        metadata: {
+          endpoint: '/api/v1/storage/file',
+          method: 'DELETE',
+          filePath,
+          ip: request.ip,
+        },
       }).catch((logErr) => logger.warn(`Log storage delete failed: ${logErr.message}`));
     }
 

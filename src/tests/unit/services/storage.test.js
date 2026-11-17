@@ -1,5 +1,6 @@
-import test from 'node:test';
+import { describe, test, mock, afterEach, beforeEach } from 'node:test';
 import assert from 'node:assert/strict';
+import prisma from '../../../config/prisma.js';
 import {
   sanitizeFileName,
   validateUploadRequest,
@@ -15,16 +16,25 @@ import {
 } from '../../../modules/storage/services/storage.service.js';
 import * as storageController from '../../../modules/storage/controllers/storage.controller.js';
 
-test('Storage Module: Unit Tests', async (t) => {
-  await t.test('sanitizeFileName removes path traversal and dangerous characters', () => {
+describe('Storage Module: Unit Tests', () => {
+  beforeEach(() => {
+    mock.method(prisma, '$queryRawUnsafe', async () => []);
+  });
+
+  afterEach(() => {
+    mock.restoreAll();
+  });
+
+  test('sanitizeFileName removes path traversal and dangerous characters', () => {
     assert.equal(sanitizeFileName('../../paper.pdf'), 'paper.pdf');
     assert.equal(sanitizeFileName('..\\..\\malicious.exe'), 'malicious.exe');
     assert.equal(sanitizeFileName('my paper (draft) #1.pdf'), 'my_paper__draft___1.pdf');
     assert.equal(sanitizeFileName(''), 'file');
     assert.equal(sanitizeFileName(null), 'file');
+    assert.equal(sanitizeFileName('..'), 'file');
   });
 
-  await t.test('validateUploadRequest rejects invalid or missing folder', async () => {
+  test('validateUploadRequest rejects invalid or missing folder', async () => {
     const mockReply = {
       statusCode: null,
       payload: null,
@@ -51,7 +61,7 @@ test('Storage Module: Unit Tests', async (t) => {
     assert.equal(mockReply.payload.code, 'INVALID_STORAGE_FOLDER');
   });
 
-  await t.test('validateUploadRequest rejects unsupported MIME type for folder', async () => {
+  test('validateUploadRequest rejects unsupported MIME type for folder', async () => {
     const mockReply = {
       statusCode: null,
       payload: null,
@@ -79,7 +89,7 @@ test('Storage Module: Unit Tests', async (t) => {
     assert.equal(mockReply.payload.code, 'UNSUPPORTED_CONTENT_TYPE');
   });
 
-  await t.test('validateUploadRequest rejects file size exceeding maximum limit', async () => {
+  test('validateUploadRequest rejects file size exceeding maximum limit', async () => {
     const mockReply = {
       statusCode: null,
       payload: null,
@@ -108,7 +118,7 @@ test('Storage Module: Unit Tests', async (t) => {
     assert.equal(mockReply.payload.code, 'FILE_SIZE_EXCEEDED');
   });
 
-  await t.test('validateUploadRequest accepts valid upload parameters and attaches storageParams', async () => {
+  test('validateUploadRequest accepts valid upload parameters and attaches storageParams', async () => {
     const mockReply = {
       statusCode: null,
       payload: null,
@@ -139,7 +149,7 @@ test('Storage Module: Unit Tests', async (t) => {
     assert.equal(req.storageParams.contentType, 'application/pdf');
   });
 
-  await t.test('validateDeleteRequest blocks directory traversal and invalid folders', async () => {
+  test('validateDeleteRequest blocks directory traversal and invalid folders', async () => {
     const mockReply = {
       statusCode: null,
       payload: null,
@@ -164,7 +174,7 @@ test('Storage Module: Unit Tests', async (t) => {
     assert.equal(mockReply.payload.code, 'INVALID_FILE_PATH_FOLDER');
   });
 
-  await t.test('createSignedUploadUrl generates proper uploadUrl and Cloudflare CDN URL', async () => {
+  test('createSignedUploadUrl generates proper uploadUrl and Cloudflare CDN URL', async () => {
     const result = await createSignedUploadUrl({
       folder: STORAGE_FOLDERS.ARTICLES,
       fileName: 'nature_paper.pdf',
@@ -183,7 +193,7 @@ test('Storage Module: Unit Tests', async (t) => {
     assert.equal(result.expiresInSeconds, 900);
   });
 
-  await t.test('getStorageConfig returns valid configuration object', () => {
+  test('getStorageConfig returns valid configuration object', () => {
     const config = getStorageConfig();
     assert.ok(config.cdnBaseUrl);
     assert.ok(config.bucket);
@@ -192,7 +202,7 @@ test('Storage Module: Unit Tests', async (t) => {
     assert.equal(config.maxFileSizes.articles, 50 * 1024 * 1024);
   });
 
-  await t.test('storageController.getStoragePublicConfig returns 200 with config payload', async () => {
+  test('storageController.getStoragePublicConfig returns 200 with config payload', async () => {
     const mockReply = {
       statusCode: null,
       payload: null,
@@ -212,7 +222,7 @@ test('Storage Module: Unit Tests', async (t) => {
     assert.ok(mockReply.payload.data.cdnBaseUrl);
   });
 
-  await t.test('storageController.requestUploadUrl returns 200 with generated URLs', async () => {
+  test('storageController.requestUploadUrl returns 200 with generated URLs', async () => {
     const mockReply = {
       statusCode: null,
       payload: null,
@@ -232,7 +242,7 @@ test('Storage Module: Unit Tests', async (t) => {
         fileName: 'avatar.png',
         contentType: 'image/png',
       },
-      user: { user_id: 10, role: 'USER' },
+      user: { user_id: 'a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d', role: 'USER' },
       ip: '127.0.0.1',
     };
 

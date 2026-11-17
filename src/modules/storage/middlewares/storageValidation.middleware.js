@@ -33,11 +33,17 @@ export const MAX_FILE_SIZES = {
 
 export const sanitizeFileName = (fileName) => {
   if (!fileName || typeof fileName !== 'string') return 'file';
+  // Chuẩn hóa dấu phân cách (hỗ trợ cả Windows \ và POSIX / trên Linux/macOS)
+  const normalized = fileName.replace(/\\/g, '/');
   // Loại bỏ các ký tự điều khiển, dấu phân cách đường dẫn và traversal
-  const base = path.basename(fileName).trim();
+  const base = path.posix.basename(normalized).trim();
   // Giữ lại các ký tự an toàn: chữ, số, dấu gạch nối, dấu chấm, gạch dưới
   const sanitized = base.replace(/[^a-zA-Z0-9._-]/g, '_');
-  return sanitized.length > 0 ? sanitized : 'file';
+  // Chặn trường hợp rỗng hoặc chỉ chứa ký tự đặc biệt (ví dụ '.', '..', '___')
+  if (!sanitized || sanitized === '.' || sanitized === '..' || !/[a-zA-Z0-9]/.test(sanitized)) {
+    return 'file';
+  }
+  return sanitized;
 };
 
 export const validateUploadRequest = async (request, reply) => {
