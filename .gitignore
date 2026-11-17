@@ -110,8 +110,11 @@ _ops/
 # OS metadata
 
 # Local agent/workflow material (kept on developer machines only)
-/scripts/
+!/scripts/
+/scripts/*
 !/scripts/verify-storage-flow.mjs
+!/scripts/run-emulator-tests.mjs
+!/scripts/verify-emulator-integration.mjs
 /tasks/
 /docs/
 /deploy/
@@ -306,8 +309,11 @@ _ops/
 # OS metadata
 
 # Local agent/workflow material (kept on developer machines only)
-/scripts/
+!/scripts/
+/scripts/*
 !/scripts/verify-storage-flow.mjs
+!/scripts/run-emulator-tests.mjs
+!/scripts/verify-emulator-integration.mjs
 /tasks/
 /docs/
 /deploy/
@@ -437,6 +443,7 @@ src/tests/
 !/src/tests/unit/services/storage.test.js
 !/src/tests/unit/services/databasePool.test.js
 !/src/tests/unit/services/queryOptimization.test.js
+!/src/tests/unit/services/firebaseIntegration.test.js
 !/src/tests/unit/auth/
 !/src/tests/unit/auth/*
 !/src/tests/integration/

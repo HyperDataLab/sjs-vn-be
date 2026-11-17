@@ -18,4 +18,8 @@ export default async function authRoutes(fastify, options) {
   fastify.post('/google', authController.ssoOnlyDisabled);
   fastify.post('/sso/bootstrap', authController.ssoOnlyDisabled);
   fastify.post('/sso/login', authController.ssoLogin);
+
+  // Firebase Auth Endpoints
+  fastify.post('/firebase/login', authController.firebaseLogin);
+  fastify.post('/firebase/verify', authController.verifyFirebaseSession);
 }
