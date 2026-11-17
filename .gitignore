@@ -444,6 +444,7 @@ src/tests/
 !/src/tests/unit/services/databasePool.test.js
 !/src/tests/unit/services/queryOptimization.test.js
 !/src/tests/unit/services/firebaseIntegration.test.js
+!/src/tests/unit/services/httpOptimization.test.js
 !/src/tests/unit/auth/
 !/src/tests/unit/auth/*
 !/src/tests/integration/
