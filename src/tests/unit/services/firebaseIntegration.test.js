@@ -26,13 +26,20 @@ import { getAuthCookieNames } from '../../../modules/auth/utils/authCookies.js';
 import { resolveAuthenticatedUser, authUserRepository } from '../../../modules/auth/middlewares/auth.middleware.js';
 import prisma from '../../../config/prisma.js';
 
+const originalEnv = { ...process.env };
+
 test('Firebase Integration & Emulator Configuration Suite', async (t) => {
   t.beforeEach(() => {
     resetFirebaseState();
+    process.env.VN_JWT_SECRET = process.env.VN_JWT_SECRET || 'test-vn-jwt-secret';
+    process.env.VN_JWT_REFRESH_SECRET = process.env.VN_JWT_REFRESH_SECRET || 'test-vn-jwt-refresh-secret';
+    process.env.JWT_SECRET = process.env.JWT_SECRET || 'test-jwt-secret';
+    process.env.JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'test-jwt-refresh-secret';
   });
 
   t.afterEach(() => {
     resetFirebaseState();
+    process.env = { ...originalEnv };
   });
 
   await t.test('configureEmulatorEnvironment cleans up protocol prefixes', () => {
@@ -90,10 +97,15 @@ test('Firebase Integration & Emulator Configuration Suite', async (t) => {
 test('Firebase Auth Service & Controller Suite', async (t) => {
   t.beforeEach(() => {
     resetFirebaseState();
+    process.env.VN_JWT_SECRET = process.env.VN_JWT_SECRET || 'test-vn-jwt-secret';
+    process.env.VN_JWT_REFRESH_SECRET = process.env.VN_JWT_REFRESH_SECRET || 'test-vn-jwt-refresh-secret';
+    process.env.JWT_SECRET = process.env.JWT_SECRET || 'test-jwt-secret';
+    process.env.JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'test-jwt-refresh-secret';
   });
 
   t.afterEach(() => {
     resetFirebaseState();
+    process.env = { ...originalEnv };
   });
 
   await t.test('verifyFirebaseToken rejects missing or blank tokens', async () => {

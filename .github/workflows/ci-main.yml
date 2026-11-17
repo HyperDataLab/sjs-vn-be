@@ -38,6 +38,7 @@ jobs:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/scientificjournalsystem_test
       POSTGRES_URL: postgresql://postgres:postgres@localhost:5432/scientificjournalsystem_test
       JWT_SECRET: "test-dummy-jwt-secret"
+      JWT_REFRESH_SECRET: "test-dummy-jwt-refresh-secret"
       NODE_ENV: test
 
     steps:

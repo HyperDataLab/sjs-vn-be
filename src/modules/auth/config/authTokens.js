@@ -12,7 +12,7 @@ const requiredSecret = (...names) => {
 };
 
 export const getChildAccessSecret = () => requiredSecret('VN_JWT_SECRET', 'JWT_SECRET');
-export const getChildRefreshSecret = () => requiredSecret('VN_JWT_REFRESH_SECRET', 'JWT_REFRESH_SECRET');
+export const getChildRefreshSecret = () => requiredSecret('VN_JWT_REFRESH_SECRET', 'JWT_REFRESH_SECRET', 'JWT_SECRET');
 export const getParentAccessSecret = () => requiredSecret('PARENT_JWT_SECRET', 'JWT_SECRET');
 export const getSsoBlockSecret = () => requiredSecret('VN_SSO_BLOCK_SECRET', 'VN_JWT_SECRET', 'JWT_SECRET');
 
