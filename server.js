@@ -11,6 +11,8 @@ import {
   startOrcidScanWorker,
 } from "./src/modules/author/services/orcidScanWorker.service.js";
 import { closeOrcidScanQueue } from "./src/modules/author/services/orcidScanQueue.service.js";
+import { closeDatabasePool } from "./src/config/database.js";
+import { closePrisma } from "./src/config/prisma.js";
 
 import { warmArticleDiscoveryCache } from "./src/modules/article/services/articleDiscoveryCache.service.js";
 
@@ -44,16 +46,41 @@ const startServer = async () => {
     process.exit(1);
   }
 
-  const shutdown = async () => {
-    await app.close();
+  const shutdown = async (signal) => {
+    console.log(`\n🛑 Nhận tín hiệu ${signal || 'SHUTDOWN'}, đang giải phóng tài nguyên an toàn...`);
+    const forceTimer = setTimeout(() => {
+      console.error('⚠️ Quá thời gian chờ shutdown (10s), buộc dừng ứng dụng.');
+      process.exit(1);
+    }, 10000);
+    forceTimer.unref();
+
+    try {
+      await Promise.allSettled([
+        closeOrcidScanWorker(),
+        closeOrcidScanQueue(),
+      ]);
+      console.log('✅ Background Workers và Queues đã đóng an toàn.');
+    } catch (workerErr) {
+      console.error('Lỗi khi đóng Workers:', workerErr);
+    }
+
+    try {
+      await app.close();
+      console.log('✅ Fastify server đã đóng.');
+    } catch (closeErr) {
+      console.error('Lỗi khi đóng Fastify server:', closeErr);
+    }
+
     await Promise.allSettled([
-      closeOrcidScanWorker(),
-      closeOrcidScanQueue(),
+      closeDatabasePool(),
+      closePrisma(),
     ]);
+    console.log('✅ Đã đóng toàn bộ Database Pool và tài nguyên hoàn tất.');
+    process.exit(0);
   };
 
-  process.once("SIGINT", shutdown);
-  process.once("SIGTERM", shutdown);
+  process.once("SIGINT", () => shutdown("SIGINT"));
+  process.once("SIGTERM", () => shutdown("SIGTERM"));
 };
 
 startServer();

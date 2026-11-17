@@ -33,6 +33,9 @@ import searchRoutes from './modules/system/routes/search.route.js';
 import zoneRoutes from './modules/system/routes/zone.route.js';
 import trendingVnRoutes from './modules/system/routes/trendingVn.route.js';
 import storageRoutes from './modules/storage/routes/storage.route.js';
+import healthRoutes from './modules/system/routes/health.route.js';
+import { closeDatabasePool } from './config/database.js';
+import { closePrisma } from './config/prisma.js';
 
 const buildApp = async () => {
   const app = Fastify({ logger: true });
@@ -145,12 +148,23 @@ const buildApp = async () => {
       else if (url.includes('zones')) tag = 'H? th?ng - V�ng (Zone)';
       else if (url.includes('trending-vn')) tag = 'H? th?ng - Xu hu?ng VN';
       else if (url.includes('storage')) tag = 'Luu tru (Storage)';
+      else if (url.includes('health')) tag = 'Hệ thống - Giám sát (Health)';
 
       routeOptions.schema.tags = [tag];
     }
   });
 
+  // Graceful shutdown hook cho Fastify: đóng toàn bộ connection pool khi ứng dụng tắt
+  app.addHook('onClose', async () => {
+    await Promise.allSettled([
+      closeDatabasePool(),
+      closePrisma(),
+    ]);
+  });
+
   // Register các routes module Fastify mới
+  app.register(healthRoutes, { prefix: '/health' });
+  app.register(healthRoutes, { prefix: '/api/v1/health' });
   app.register(authRoutes, { prefix: '/api/v1/auth' });
   app.register(userRoutes, { prefix: '/api/v1/users' });
   app.register(adminRoutes, { prefix: '/api/v1/admin' });
