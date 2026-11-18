@@ -1,4 +1,5 @@
 import * as authController from '../controllers/auth.controller.js';
+import { authRateLimitConfig } from '../../../config/httpOptimization.js';
 
 /**
  * @param {import('fastify').FastifyInstance} fastify
@@ -17,9 +18,9 @@ export default async function authRoutes(fastify, options) {
   // Google Auth Endpoint
   fastify.post('/google', authController.ssoOnlyDisabled);
   fastify.post('/sso/bootstrap', authController.ssoOnlyDisabled);
-  fastify.post('/sso/login', authController.ssoLogin);
+  fastify.post('/sso/login', authRateLimitConfig, authController.ssoLogin);
 
   // Firebase Auth Endpoints
-  fastify.post('/firebase/login', authController.firebaseLogin);
-  fastify.post('/firebase/verify', authController.verifyFirebaseSession);
+  fastify.post('/firebase/login', authRateLimitConfig, authController.firebaseLogin);
+  fastify.post('/firebase/verify', authRateLimitConfig, authController.verifyFirebaseSession);
 }

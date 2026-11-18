@@ -4,7 +4,10 @@ import swaggerUi from '@fastify/swagger-ui';
 import cors from '@fastify/cors';
 import cookie from '@fastify/cookie';
 import formbody from '@fastify/formbody';
+import compress from '@fastify/compress';
+import rateLimit from '@fastify/rate-limit';
 import { getAuthCookieNames } from './modules/auth/utils/authCookies.js';
+import { getCompressionConfig, getRateLimitConfig } from './config/httpOptimization.js';
 
 
 // Tạm thời comment rootRouter express cũ
@@ -37,8 +40,15 @@ import healthRoutes from './modules/system/routes/health.route.js';
 import { closeDatabasePool } from './config/database.js';
 import { closePrisma } from './config/prisma.js';
 
-const buildApp = async () => {
-  const app = Fastify({ logger: true });
+const buildApp = async (options = {}) => {
+  const app = Fastify({
+    logger: true,
+    trustProxy: true,
+    ...options,
+  });
+
+  await app.register(compress, getCompressionConfig());
+  await app.register(rateLimit, getRateLimitConfig(options.rateLimit));
 
   await app.register(cors, {
     origin: (origin, callback) => {
