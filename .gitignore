@@ -227,6 +227,7 @@ src/tests/
 /deploy/sql/*
 !/deploy/sql/0003_add_orcid_scan_unique_indexes.sql
 !/deploy/sql/0004_add_orcid_scan_journal_identity.sql
+!/deploy/sql/0007_add_performance_and_relationship_indexes.sql
 
 !/src/tests/
 /src/tests/*
@@ -426,6 +427,7 @@ src/tests/
 /deploy/sql/*
 !/deploy/sql/0003_add_orcid_scan_unique_indexes.sql
 !/deploy/sql/0004_add_orcid_scan_journal_identity.sql
+!/deploy/sql/0007_add_performance_and_relationship_indexes.sql
 
 !/src/tests/
 /src/tests/*
@@ -445,6 +447,7 @@ src/tests/
 !/src/tests/unit/services/queryOptimization.test.js
 !/src/tests/unit/services/firebaseIntegration.test.js
 !/src/tests/unit/services/httpOptimization.test.js
+!/src/tests/unit/services/dbIndexesOptimization.test.js
 !/src/tests/unit/auth/
 !/src/tests/unit/auth/*
 !/src/tests/integration/
