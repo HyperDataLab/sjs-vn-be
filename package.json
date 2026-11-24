@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "nodemon server.js",
     "dev:ts": "tsx watch server.js",
+    "worker": "node worker.js",
+    "worker:dev": "tsx watch worker.js",
     "typecheck": "tsc --noEmit",
     "start": "node server.js",
     "lint": "eslint src/",
