@@ -10,7 +10,8 @@ services:
       - "5000:5000"
 
     env_file:
-      - .env
+      - path: .env
+        required: false
 
     # Inside Docker, localhost points to this container. The central SSO API
     # is reachable through the shared network; override when the service name
@@ -19,6 +20,33 @@ services:
       CENTRAL_SSO_API_URL: ${CENTRAL_SSO_API_URL:-http://localhost:3001}
       CENTRAL_SSO_ISSUER_URL: ${CENTRAL_SSO_ISSUER_URL:-${CENTRAL_SSO_API_URL:-http://localhost:3001}}
 
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:5000/health/ping"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+    networks:
+      - researchpulse_network
+
+  vietnam-worker:
+    image: ${BACKEND_IMAGE:-ghcr.io/researchpulse/scientificjournalsystem-vietnam-be:latest}
+    container_name: researchpulse_worker_vn
+    restart: unless-stopped
+    command: ["node", "worker.js"]
+
+    env_file:
+      - path: .env
+        required: false
+
+    environment:
+      CENTRAL_SSO_API_URL: ${CENTRAL_SSO_API_URL:-http://localhost:3001}
+      CENTRAL_SSO_ISSUER_URL: ${CENTRAL_SSO_ISSUER_URL:-${CENTRAL_SSO_API_URL:-http://localhost:3001}}
+
+    depends_on:
+      - vietnam-backend
+
     networks:
       - researchpulse_network
 
@@ -26,3 +54,4 @@ networks:
   researchpulse_network:
     external: true
     name: researchpulse_network
+
