@@ -33,22 +33,11 @@ pool.on("error", (err) => {
   logger.error("Lỗi bất ngờ xảy ra trên client trong pg.Pool:", err);
 });
 
-// Chỉ thực hiện ping kiểm tra khi khởi động ở môi trường runtime thực (tránh gây timeout trong unit tests)
-if (process.env.NODE_ENV !== "test" && url) {
-  pool.query("SELECT NOW()", (err, res) => {
-    if (err) {
-      logger.error("Ket noi toi PostgreSQL that bai!", err);
-    } else {
-      logger.db(`Ket noi toi PostgreSQL thanh cong luc: ${res.rows[0].now}`);
-    }
-  });
-}
-
 /**
  * Đóng an toàn toàn bộ kết nối trong pg.Pool khi tắt ứng dụng (Graceful Shutdown)
  */
 export const closeDatabasePool = async () => {
-  if (pool.ended) return;
+  if (!pool || pool.ended) return;
   try {
     await pool.end();
     logger.info("pg.Pool đã được đóng an toàn.");
@@ -59,7 +48,7 @@ export const closeDatabasePool = async () => {
 
 /**
  * Kiểm tra trạng thái sức khỏe và độ trễ của kết nối PostgreSQL
- * @returns {Promise<{ status: 'healthy'|'unhealthy'|'down', latencyMs?: number, pool?: object, error?: string }>}
+ * @returns {Promise<{ status: 'healthy'|'unhealthy'|'down', latencyMs?: number, pool?: object, error?: string, serverTime?: string, message?: string }>}
  */
 export const checkDatabaseHealth = async () => {
   if (pool.ended) {
@@ -75,11 +64,11 @@ export const checkDatabaseHealth = async () => {
     return {
       status: "healthy",
       latencyMs: Date.now() - start,
-      serverTime: res.rows[0].server_time,
+      serverTime: res.rows?.[0]?.server_time || new Date().toISOString(),
       pool: {
-        total: pool.totalCount,
-        idle: pool.idleCount,
-        waiting: pool.waitingCount,
+        total: pool.totalCount || 0,
+        idle: pool.idleCount || 0,
+        waiting: pool.waitingCount || 0,
         max: poolConfig.max,
         min: poolConfig.min,
       },
@@ -90,9 +79,9 @@ export const checkDatabaseHealth = async () => {
       latencyMs: Date.now() - start,
       error: error.message,
       pool: {
-        total: pool.totalCount,
-        idle: pool.idleCount,
-        waiting: pool.waitingCount,
+        total: pool.totalCount || 0,
+        idle: pool.idleCount || 0,
+        waiting: pool.waitingCount || 0,
       },
     };
   }

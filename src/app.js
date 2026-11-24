@@ -74,6 +74,13 @@ const buildApp = async (options = {}) => {
     }
   });
 
+  // Chuẩn hóa serialize JSON phản hồi, tự động chuyển đổi BigInt sang string an toàn
+  app.setReplySerializer((payload) => {
+    return JSON.stringify(payload, (_key, value) =>
+      typeof value === 'bigint' ? value.toString() : value
+    );
+  });
+
   app.addHook('onRequest', async (request, reply) => {
     const sessionRoute = request.url.startsWith('/api/v1/auth/sso/')
       || request.url.startsWith('/api/v1/auth/logout')
