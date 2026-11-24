@@ -20,11 +20,20 @@ import { closeOrcidScanQueue } from "./src/modules/author/services/orcidScanQueu
 import { closeDatabasePool } from "./src/config/database.js";
 import { closePrisma } from "./src/config/prisma.js";
 import { warmArticleDiscoveryCache } from "./src/modules/article/services/articleDiscoveryCache.service.js";
+import { assertEnvValid } from "./src/config/envValidation.js";
 
 dotenv.config();
 const PORT = process.env.PORT || 5000;
 
 const startServer = async () => {
+  // Fail-fast environment validation
+  try {
+    assertEnvValid();
+  } catch (envErr) {
+    console.error("❌ Không thể khởi động server do lỗi cấu hình môi trường:", envErr.message);
+    process.exit(1);
+  }
+
   const app = await buildApp();
 
   try {

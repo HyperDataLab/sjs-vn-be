@@ -236,6 +236,8 @@ src/tests/
 !/src/tests/unit/utils/
 /src/tests/unit/utils/*
 !/src/tests/unit/utils/orcid.test.js
+!/src/tests/unit/config/
+!/src/tests/unit/config/*
 !/src/tests/unit/services/
 # ==========================================
 # 4. File rác từ các Hệ điều hành (OS)
@@ -436,6 +438,8 @@ src/tests/
 !/src/tests/unit/utils/
 /src/tests/unit/utils/*
 !/src/tests/unit/utils/orcid.test.js
+!/src/tests/unit/config/
+!/src/tests/unit/config/*
 !/src/tests/unit/services/
 /src/tests/unit/services/*
 !/src/tests/unit/services/orcidSources.test.js
