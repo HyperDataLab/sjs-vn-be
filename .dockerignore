@@ -9,8 +9,13 @@ npm-debug.log
 !.env.example
 
 tests
+src/tests
 coverage
 
 Dockerfile
 docker-compose.yml
 README.md
+
+.vscode
+.idea
+*.log
