@@ -55,6 +55,11 @@ model Article {
   @@index([publication_year], map: "idx_article_pub_year")
   @@index([is_vn_journal], map: "idx_article_vn_flag")
   @@index([openalex_id], map: "idx_article_openalex_id")
+  @@index([is_deleted, created_at(sort: Desc)], map: "idx_article_is_deleted_created")
+  @@index([is_deleted, publication_year], map: "idx_article_is_deleted_pub_year")
+  @@index([primary_topic], map: "idx_article_primary_topic")
+  @@index([issue_id], map: "idx_article_issue_id")
+  @@index([doi], map: "idx_article_doi")
   @@schema("public")
 }
 
@@ -88,6 +93,7 @@ model Author_Article {
   Author          Author  @relation(fields: [author_id], references: [author_id], onDelete: NoAction, onUpdate: NoAction)
 
   @@id([author_id, article_id])
+  @@index([article_id], map: "idx_author_article_article_id")
   @@schema("public")
 }
 
@@ -130,6 +136,7 @@ model Issue {
   Article          Article[]
   Volume           Volume?   @relation(fields: [volume_id], references: [volume_id], onDelete: NoAction, onUpdate: NoAction)
 
+  @@index([volume_id], map: "idx_issue_volume_id")
   @@schema("public")
 }
 
@@ -159,6 +166,8 @@ model Journal {
   Volume                     Volume[]
 
   @@index([display_name(ops: raw("gin_trgm_ops"))], type: Gin, map: "idx_journal_name_trgm")
+  @@index([publisher_id], map: "idx_journal_publisher_id")
+  @@index([is_deleted], map: "idx_journal_is_deleted")
   @@schema("public")
 }
 
@@ -202,6 +211,7 @@ model Journal_Subject_Category {
   Subject_Category    Subject_Category @relation(fields: [subject_category_id], references: [subject_category_id], onDelete: NoAction, onUpdate: NoAction)
 
   @@id([journal_id, subject_category_id])
+  @@index([subject_category_id], map: "idx_jsc_subject_category_id")
   @@schema("public")
 }
 
@@ -224,6 +234,7 @@ model Keyword_Article {
   Keyword    Keyword @relation(fields: [keyword_id], references: [keyword_id], onDelete: NoAction, onUpdate: NoAction)
 
   @@id([keyword_id, article_id])
+  @@index([article_id], map: "idx_keyword_article_article_id")
   @@schema("public")
 }
 
@@ -260,6 +271,7 @@ model Project {
   Project_Member           Project_Member[]
   Subject_Category_Project Subject_Category_Project[]
 
+  @@index([user_id], map: "idx_project_user_id")
   @@schema("public")
 }
 
@@ -273,6 +285,8 @@ model Project_Article_Bookmark {
   user       user      @relation(fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction, map: "FK_Project_Article_User")
 
   @@id([project_id, article_id, user_id], map: "PK_Project_Article_Bookmark")
+  @@index([article_id], map: "idx_pab_article_id")
+  @@index([user_id], map: "idx_pab_user_id")
   @@schema("public")
 }
 
@@ -370,6 +384,7 @@ model Sub_Topic {
   Topic      Topic   @relation(fields: [topic_id], references: [topic_id], onDelete: NoAction, onUpdate: NoAction)
 
   @@id([article_id, topic_id])
+  @@index([topic_id], map: "idx_sub_topic_topic_id")
   @@schema("public")
 }
 
@@ -427,6 +442,8 @@ model Topic {
   Subject_Area        Subject_Area?     @relation(fields: [subject_area_id], references: [subject_area_id], onDelete: NoAction, onUpdate: NoAction)
   Subject_Category    Subject_Category? @relation(fields: [subject_category_id], references: [subject_category_id], onDelete: NoAction, onUpdate: NoAction)
 
+  @@index([subject_area_id], map: "idx_topic_subject_area_id")
+  @@index([subject_category_id], map: "idx_topic_subject_category_id")
   @@schema("public")
 }
 
@@ -440,6 +457,7 @@ model Volume {
   Issue            Issue[]
   Journal          Journal? @relation(fields: [journal_id], references: [journal_id], onDelete: NoAction, onUpdate: NoAction)
 
+  @@index([journal_id], map: "idx_volume_journal_id")
   @@schema("public")
 }
 
@@ -481,6 +499,7 @@ model Article_Citing_Work {
 
   @@id([article_id, openalex_work_id])
   @@index([article_id], map: "idx_citing_work_article")
+  @@index([citing_article_id], map: "idx_citing_work_citing_article_id")
   @@schema("public")
 }
 
@@ -509,6 +528,7 @@ model Article_Reference {
 
   @@id([article_id, reference_key])
   @@index([article_id], map: "idx_reference_article")
+  @@index([referenced_article_id], map: "idx_reference_referenced_article_id")
   @@schema("public")
 }
 
@@ -798,5 +818,6 @@ model Bookmark {
   created_at  DateTime? @default(now()) @db.Timestamp(6)
 
   @@unique([user_id, article_id], map: "UQ_Bookmark_user_article")
+  @@index([article_id], map: "idx_bookmark_article_id")
   @@schema("public")
 }
