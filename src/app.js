@@ -44,7 +44,16 @@ const buildApp = async (options = {}) => {
   const app = Fastify({
     logger: true,
     trustProxy: true,
+    requestIdHeader: 'x-request-id',
+    requestIdLogLabel: 'reqId',
     ...options,
+  });
+
+  // Attach request ID to response header for distributed tracing
+  app.addHook('onSend', async (request, reply) => {
+    if (request.id) {
+      reply.header('x-request-id', request.id);
+    }
   });
 
   await app.register(compress, getCompressionConfig());
