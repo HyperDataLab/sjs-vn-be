@@ -456,8 +456,6 @@ src/tests/
 !/src/tests/unit/auth/*
 !/src/tests/integration/
 /src/tests/integration/*
-!/src/tests/integration/orcidScan.route.test.js
-!/src/tests/integration/articleReferenceHydration.route.test.js
 !/src/tests/integration/auth/
 !/src/tests/integration/auth/*
 !/plans/
