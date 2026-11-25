@@ -5,12 +5,20 @@
   "main": "index.js",
   "scripts": {
     "dev": "nodemon server.js",
+    "dev:ts": "tsx watch server.js",
+    "worker": "node worker.js",
+    "worker:dev": "tsx watch worker.js",
+    "typecheck": "tsc --noEmit",
     "start": "node server.js",
     "lint": "eslint src/",
     "test": "node --test --experimental-test-module-mocks src/tests/unit/**/*.test.js",
     "test:controller": "node --test src/tests/unit/controllers/*.test.js",
     "test:service": "node --test src/tests/unit/service/*.test.js",
     "test:auth": "node --test --experimental-test-module-mocks src/tests/unit/auth/*.test.js src/tests/integration/auth*.test.js src/tests/integration/auth/*.test.js",
+    "emulator": "firebase emulators:start --only auth,storage",
+    "emulator:auth": "firebase emulators:start --only auth",
+    "test:emulator": "node scripts/run-emulator-tests.mjs",
+    "verify:emulator": "node scripts/verify-emulator-integration.mjs",
     "check:brain-manifest": "repo-harness run check-brain-manifest",
     "check:context-files": "repo-harness run check-context-files",
     "check:deploy-sql": "repo-harness run check-deploy-sql-order",
@@ -24,12 +32,16 @@
   "license": "ISC",
   "type": "module",
   "dependencies": {
+    "@fastify/compress": "^7.0.3",
     "@fastify/cookie": "^9.0.4",
     "@fastify/cors": "^8.3.0",
     "@fastify/formbody": "^7.4.0",
+    "@fastify/rate-limit": "^9.1.0",
     "@fastify/swagger": "^8.12.0",
     "@fastify/swagger-ui": "^1.9.0",
+    "@fastify/type-provider-typebox": "6.3.0",
     "@prisma/client": "^5.10.0",
+    "@sinclair/typebox": "0.34.52",
     "axios": "^1.17.0",
     "bcryptjs": "3.0.3",
     "bullmq": "5.81.2",
@@ -44,10 +56,14 @@
     "swagger-jsdoc": "6.3.0"
   },
   "devDependencies": {
+    "@types/node": "26.6.6",
     "eslint": "^8.57.0",
+    "firebase-tools": "^15.36.0",
     "nodemon": "3.1.14",
     "prisma": "^5.10.0",
-    "supertest": "7.2.2"
+    "supertest": "7.2.2",
+    "tsx": "4.23.15",
+    "typescript": "7.0.2"
   },
   "private": true
 }

@@ -38,6 +38,7 @@ jobs:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/scientificjournalsystem_test
       POSTGRES_URL: postgresql://postgres:postgres@localhost:5432/scientificjournalsystem_test
       JWT_SECRET: "test-dummy-jwt-secret"
+      JWT_REFRESH_SECRET: "test-dummy-jwt-refresh-secret"
       NODE_ENV: test
 
     steps:
@@ -51,10 +52,13 @@ jobs:
           cache: npm
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Generate Prisma Client
         run: npx prisma generate
+
+      - name: Run typecheck
+        run: npm run typecheck
 
       - name: Run database migrations
         run: npx prisma migrate deploy
@@ -143,9 +147,9 @@ jobs:
 
             export BACKEND_IMAGE=ghcr.io/researchpulse/scientificjournalsystem-vietnam-be:${{ github.sha }}
             docker-compose config
-            docker-compose pull vietnam-backend
-            docker-compose up -d --force-recreate --no-deps vietnam-backend
-            docker-compose ps vietnam-backend
+            docker-compose pull vietnam-backend vietnam-worker
+            docker-compose up -d --force-recreate --no-deps vietnam-backend vietnam-worker
+            docker-compose ps
 
             docker image prune -f
 

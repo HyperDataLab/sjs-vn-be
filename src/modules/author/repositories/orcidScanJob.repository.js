@@ -23,7 +23,9 @@ const setCachedJob = async (job) => {
     const isTerminal = TERMINAL_STATUSES.includes(job.status);
     const ttl = isTerminal ? TERMINAL_CACHE_TTL : ACTIVE_CACHE_TTL;
     await redis.set(`${JOB_CACHE_PREFIX}${job.job_id}`, JSON.stringify(job), "EX", ttl);
-  } catch {}
+  } catch {
+    /* ignore cache write failures */
+  }
 };
 
 const activeJobQuery = `
@@ -130,7 +132,9 @@ export const getOrcidScanJobPublications = async (
   try {
     const cached = await redis.get(cacheKey);
     if (cached) return JSON.parse(cached);
-  } catch {}
+  } catch {
+    /* ignore cache read failures */
+  }
 
   const result = await prisma.$queryRawUnsafe(
     `
@@ -207,7 +211,9 @@ export const getOrcidScanJobPublications = async (
   };
   try {
     await redis.set(cacheKey, JSON.stringify(response), "EX", 1800);
-  } catch {}
+  } catch {
+    /* ignore cache write failures */
+  }
 
   return response;
 };

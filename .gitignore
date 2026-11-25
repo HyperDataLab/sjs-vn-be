@@ -110,8 +110,11 @@ _ops/
 # OS metadata
 
 # Local agent/workflow material (kept on developer machines only)
-/scripts/
+!/scripts/
+/scripts/*
 !/scripts/verify-storage-flow.mjs
+!/scripts/run-emulator-tests.mjs
+!/scripts/verify-emulator-integration.mjs
 /tasks/
 /docs/
 /deploy/
@@ -224,6 +227,7 @@ src/tests/
 /deploy/sql/*
 !/deploy/sql/0003_add_orcid_scan_unique_indexes.sql
 !/deploy/sql/0004_add_orcid_scan_journal_identity.sql
+!/deploy/sql/0007_add_performance_and_relationship_indexes.sql
 
 !/src/tests/
 /src/tests/*
@@ -232,6 +236,8 @@ src/tests/
 !/src/tests/unit/utils/
 /src/tests/unit/utils/*
 !/src/tests/unit/utils/orcid.test.js
+!/src/tests/unit/config/
+!/src/tests/unit/config/*
 !/src/tests/unit/services/
 # ==========================================
 # 4. File rác từ các Hệ điều hành (OS)
@@ -306,8 +312,11 @@ _ops/
 # OS metadata
 
 # Local agent/workflow material (kept on developer machines only)
-/scripts/
+!/scripts/
+/scripts/*
 !/scripts/verify-storage-flow.mjs
+!/scripts/run-emulator-tests.mjs
+!/scripts/verify-emulator-integration.mjs
 /tasks/
 /docs/
 /deploy/
@@ -420,6 +429,7 @@ src/tests/
 /deploy/sql/*
 !/deploy/sql/0003_add_orcid_scan_unique_indexes.sql
 !/deploy/sql/0004_add_orcid_scan_journal_identity.sql
+!/deploy/sql/0007_add_performance_and_relationship_indexes.sql
 
 !/src/tests/
 /src/tests/*
@@ -428,6 +438,8 @@ src/tests/
 !/src/tests/unit/utils/
 /src/tests/unit/utils/*
 !/src/tests/unit/utils/orcid.test.js
+!/src/tests/unit/config/
+!/src/tests/unit/config/*
 !/src/tests/unit/services/
 /src/tests/unit/services/*
 !/src/tests/unit/services/orcidSources.test.js
@@ -435,12 +447,15 @@ src/tests/
 !/src/tests/unit/services/orcidScanRepository.test.js
 !/src/tests/unit/services/articleReferenceHydration.test.js
 !/src/tests/unit/services/storage.test.js
+!/src/tests/unit/services/databasePool.test.js
+!/src/tests/unit/services/queryOptimization.test.js
+!/src/tests/unit/services/firebaseIntegration.test.js
+!/src/tests/unit/services/httpOptimization.test.js
+!/src/tests/unit/services/dbIndexesOptimization.test.js
 !/src/tests/unit/auth/
 !/src/tests/unit/auth/*
 !/src/tests/integration/
 /src/tests/integration/*
-!/src/tests/integration/orcidScan.route.test.js
-!/src/tests/integration/articleReferenceHydration.route.test.js
 !/src/tests/integration/auth/
 !/src/tests/integration/auth/*
 !/plans/

@@ -17,6 +17,7 @@ import {
   inspectParentCookie,
 } from '../services/sso.service.js';
 import { resolveAuthenticatedUser } from '../middlewares/auth.middleware.js';
+import { loginWithFirebase, verifyFirebaseToken } from '../services/firebaseAuth.service.js';
 
 export const ssoOnlyDisabled = async (_request, reply) => reply.status(410).send({
   success: false,
@@ -420,5 +421,97 @@ export const googleLogin = async (request, reply) => {
       return reply.status(error.statusCode).send({ success: false, message: error.message, code: error.code });
     }
     return reply.status(500).send({ success: false, message: 'Lỗi server nội bộ' });
+  }
+};
+
+
+export const firebaseLogin = async (request, reply) => {
+  try {
+    const { idToken, remember = false } = request.body || {};
+    if (!idToken || typeof idToken !== 'string') {
+      return reply.status(400).send({
+        success: false,
+        code: 'ID_TOKEN_REQUIRED',
+        message: 'Firebase ID token không được để trống',
+      });
+    }
+
+    const data = await loginWithFirebase({ idToken, remember });
+
+    const cookieNames = getAuthCookieNames();
+    reply.setCookie(cookieNames.access, data.token, getAuthCookieOptions('access'));
+
+    if (remember === true && data.refreshToken) {
+      reply.setCookie(cookieNames.refresh, data.refreshToken, getAuthCookieOptions('refresh'));
+    } else {
+      reply.clearCookie(cookieNames.refresh, getClearAuthCookieOptions());
+    }
+
+    createLog({
+      userId: data.user.user_id,
+      userRole: data.user.role,
+      action: 'LOGIN',
+      message: `Người dùng ${data.user.email} đăng nhập qua Firebase Auth thành công`,
+      metadata: { ip: request.ip, userAgent: request.headers['user-agent'] },
+    });
+
+    return reply.status(200).send({
+      success: true,
+      code: 'LOGIN_SUCCESS',
+      message: 'Đăng nhập Firebase thành công',
+      data: {
+        token: data.token,
+        user: {
+          user_id: data.user.user_id,
+          email: data.user.email,
+          role: data.user.role,
+          status: data.user.status,
+          first_name: data.user.first_name,
+          last_name: data.user.last_name,
+          url_image: data.user.url_image,
+        },
+      },
+    });
+  } catch (error) {
+    if (!error.statusCode || error.statusCode === 500) {
+      logger.error('Lỗi trong firebaseLogin controller:', error);
+    }
+    return reply.status(error.statusCode || 500).send({
+      success: false,
+      code: error.code || 'FIREBASE_AUTH_FAILED',
+      message: error.statusCode ? error.message : 'Lỗi hệ thống khi xác thực Firebase',
+    });
+  }
+};
+
+export const verifyFirebaseSession = async (request, reply) => {
+  try {
+    const { idToken } = request.body || {};
+    if (!idToken || typeof idToken !== 'string') {
+      return reply.status(400).send({
+        success: false,
+        code: 'ID_TOKEN_REQUIRED',
+        message: 'Firebase ID token không được để trống',
+      });
+    }
+
+    const decoded = await verifyFirebaseToken(idToken);
+    return reply.status(200).send({
+      success: true,
+      code: 'FIREBASE_TOKEN_VALID',
+      message: 'Firebase token hợp lệ',
+      data: {
+        uid: decoded.uid,
+        email: decoded.email,
+        name: decoded.name || decoded.displayName || null,
+        picture: decoded.picture || null,
+      },
+    });
+  } catch (error) {
+    return reply.status(error.statusCode || 401).send({
+      success: false,
+      code: error.code || 'FIREBASE_TOKEN_INVALID',
+      message: error.message || 'Firebase ID token không hợp lệ',
+    });
   }
 };

@@ -7,20 +7,23 @@ RUN apk add --no-cache openssl
 # Cài đặt thư mục làm việc mặc định trong container
 WORKDIR /app
 
-# Copy package.json và package-lock.json trước để tận dụng Docker cache layer cho phần install
+# Copy package descriptors và Prisma schema trước để tối ưu hóa Docker layer cache
 COPY package.json package-lock.json ./
+COPY prisma ./prisma/
 
-# Cài đặt các thư viện (dùng npm ci để build nhanh và chính xác version từ lock file)
-RUN npm ci
+# Cài đặt các thư viện (npm ci) và sinh Prisma Client trước khi copy mã nguồn
+RUN npm ci && npx prisma generate
 
 # Copy toàn bộ mã nguồn của dự án vào container (sẽ bỏ qua các file trong .dockerignore)
 COPY . .
 
-# Bắt buộc: Khởi tạo Prisma Client để map với Database
-RUN npx prisma generate
-
-# Expose port mà Fastify server đang lắng nghe (được cấu hình qua env PORT=8000)
+# Expose port mà Fastify server đang lắng nghe (mặc định PORT=5000)
 EXPOSE 5000
+
+# Health check định kỳ kiểm tra server hoạt động thông qua liveness endpoint
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:5000/health/ping || exit 1
 
 # Khởi chạy ứng dụng (chạy lệnh "node server.js" đã được định nghĩa trong package.json)
 CMD ["npm", "start"]
+

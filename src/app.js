@@ -4,7 +4,10 @@ import swaggerUi from '@fastify/swagger-ui';
 import cors from '@fastify/cors';
 import cookie from '@fastify/cookie';
 import formbody from '@fastify/formbody';
+import compress from '@fastify/compress';
+import rateLimit from '@fastify/rate-limit';
 import { getAuthCookieNames } from './modules/auth/utils/authCookies.js';
+import { getCompressionConfig, getRateLimitConfig } from './config/httpOptimization.js';
 
 
 // Tạm thời comment rootRouter express cũ
@@ -33,9 +36,28 @@ import searchRoutes from './modules/system/routes/search.route.js';
 import zoneRoutes from './modules/system/routes/zone.route.js';
 import trendingVnRoutes from './modules/system/routes/trendingVn.route.js';
 import storageRoutes from './modules/storage/routes/storage.route.js';
+import healthRoutes from './modules/system/routes/health.route.js';
+import { closeDatabasePool } from './config/database.js';
+import { closePrisma } from './config/prisma.js';
 
-const buildApp = async () => {
-  const app = Fastify({ logger: true });
+const buildApp = async (options = {}) => {
+  const app = Fastify({
+    logger: true,
+    trustProxy: true,
+    requestIdHeader: 'x-request-id',
+    requestIdLogLabel: 'reqId',
+    ...options,
+  });
+
+  // Attach request ID to response header for distributed tracing
+  app.addHook('onSend', async (request, reply) => {
+    if (request.id) {
+      reply.header('x-request-id', request.id);
+    }
+  });
+
+  await app.register(compress, getCompressionConfig());
+  await app.register(rateLimit, getRateLimitConfig(options.rateLimit));
 
   await app.register(cors, {
     origin: (origin, callback) => {
@@ -59,6 +81,13 @@ const buildApp = async () => {
       err.statusCode = 400;
       done(err, undefined);
     }
+  });
+
+  // Chuẩn hóa serialize JSON phản hồi, tự động chuyển đổi BigInt sang string an toàn
+  app.setReplySerializer((payload) => {
+    return JSON.stringify(payload, (_key, value) =>
+      typeof value === 'bigint' ? value.toString() : value
+    );
   });
 
   app.addHook('onRequest', async (request, reply) => {
@@ -145,12 +174,23 @@ const buildApp = async () => {
       else if (url.includes('zones')) tag = 'H? th?ng - V�ng (Zone)';
       else if (url.includes('trending-vn')) tag = 'H? th?ng - Xu hu?ng VN';
       else if (url.includes('storage')) tag = 'Luu tru (Storage)';
+      else if (url.includes('health')) tag = 'Hệ thống - Giám sát (Health)';
 
       routeOptions.schema.tags = [tag];
     }
   });
 
+  // Graceful shutdown hook cho Fastify: đóng toàn bộ connection pool khi ứng dụng tắt
+  app.addHook('onClose', async () => {
+    await Promise.allSettled([
+      closeDatabasePool(),
+      closePrisma(),
+    ]);
+  });
+
   // Register các routes module Fastify mới
+  app.register(healthRoutes, { prefix: '/health' });
+  app.register(healthRoutes, { prefix: '/api/v1/health' });
   app.register(authRoutes, { prefix: '/api/v1/auth' });
   app.register(userRoutes, { prefix: '/api/v1/users' });
   app.register(adminRoutes, { prefix: '/api/v1/admin' });
